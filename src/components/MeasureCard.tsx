@@ -40,6 +40,10 @@ export default function MeasureCard({
           <CandyIcon /> {measureInfo.sugarLevel} mmol/L
         </p>
       </div>
+
+      <p className="mt-4 text-sm italic text-gray-500">
+        {measureInfo.comment ? measureInfo.comment : "No comment added."}
+      </p>
     </Card>
   );
 }

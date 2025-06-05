@@ -5,11 +5,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import MeasureList from "@/components/MeasureList";
 import { Calendar } from "@/components/ui/calendar";
+import { getAllMeasureDataByOwner } from "@/actions/handleMeasure";
+import { MeasureInfo } from "./AddMeasure";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   const [profileInfo, setProfileInfo] = useState<UserProfile>();
+  const [measureData, setMeasureData] = useState<MeasureInfo[]>();
 
   useEffect(() => {
     const profileId = localStorage.getItem("profileId");
@@ -23,6 +27,15 @@ export default function HomePage() {
       navigate("/add-profile");
     }
   }, []);
+
+  useEffect(() => {
+    if (profileInfo?.id) {
+      (async () => {
+        const res = await getAllMeasureDataByOwner(profileInfo.id);
+        setMeasureData(res);
+      })();
+    }
+  }, [profileInfo]);
 
   return (
     <>
@@ -43,7 +56,21 @@ export default function HomePage() {
                 </TabsList>
               </div>
               <TabsContent value="measure_data">
-                <MeasureList />
+                {measureData && measureData?.length > 0 ? (
+                  <MeasureList measureData={measureData} />
+                ) : (
+                  <div className="mt-12">
+                    <p className="text-center">
+                      You have no measure data yet. Please add a new one.
+                    </p>
+                    <Button
+                      className="mx-auto mt-6 block"
+                      onClick={() => navigate("/add-measure")}
+                    >
+                      Add new Measure Data
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
               <TabsContent value="calendar">
                 <div className="flex justify-center pt-10">

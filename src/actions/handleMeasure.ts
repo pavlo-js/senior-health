@@ -52,6 +52,31 @@ export async function getMeasureData(id: string): Promise<MeasureInfo | null> {
   });
 }
 
+export async function getAllMeasureDataByOwner(
+  ownerId: string,
+): Promise<MeasureInfo[]> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const allData = (request.result as MeasureInfo[]) || [];
+      const filtered = allData
+        .filter((item) => item.ownerId === ownerId)
+        .sort(
+          (a, b) =>
+            (b.date ? new Date(b.date).getTime() : 0) -
+            (a.date ? new Date(a.date).getTime() : 0),
+        );
+      resolve(filtered);
+    };
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => db.close();
+  });
+}
+
 export async function deleteMeasureData(id: string): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/layout";
 
@@ -80,6 +81,15 @@ export default function AddMeasurePage() {
     }
   }
 
+  useEffect(() => {
+    if (
+      form.formState.errors &&
+      Object.keys(form.formState.errors).length > 0
+    ) {
+      console.error("Form errors:", form.formState.errors);
+    }
+  }, [form.formState.errors]);
+
   return (
     <MainLayout>
       <div className="px-4">
@@ -152,6 +162,20 @@ export default function AddMeasurePage() {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="temperature"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Body Temperature (°C) *</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="bloodPressSys"
