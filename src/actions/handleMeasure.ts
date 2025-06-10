@@ -52,8 +52,9 @@ export async function getMeasureData(id: string): Promise<MeasureInfo | null> {
   });
 }
 
-export async function getAllMeasureDataByOwner(
+export async function getAllMeasureDataByOwnerAndDate(
   ownerId: string,
+  date: string,
 ): Promise<MeasureInfo[]> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -63,13 +64,9 @@ export async function getAllMeasureDataByOwner(
 
     request.onsuccess = () => {
       const allData = (request.result as MeasureInfo[]) || [];
-      const filtered = allData
-        .filter((item) => item.ownerId === ownerId)
-        .sort(
-          (a, b) =>
-            (b.date ? new Date(b.date).getTime() : 0) -
-            (a.date ? new Date(a.date).getTime() : 0),
-        );
+      const filtered = allData.filter(
+        (item) => item.ownerId === ownerId && item.date === date,
+      );
       resolve(filtered);
     };
     request.onerror = () => reject(request.error);

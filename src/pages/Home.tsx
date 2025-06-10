@@ -4,16 +4,48 @@ import { getProfile, UserProfile } from "@/actions/handleProfile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import MeasureList from "@/components/MeasureList";
-import { Calendar } from "@/components/ui/calendar";
-import { getAllMeasureDataByOwner } from "@/actions/handleMeasure";
+import { getAllMeasureDataByOwnerAndDate } from "@/actions/handleMeasure";
 import { MeasureInfo } from "./AddMeasure";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/DatePicker";
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   const [profileInfo, setProfileInfo] = useState<UserProfile>();
   const [measureData, setMeasureData] = useState<MeasureInfo[]>();
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().slice(0, 10),
+  );
+
+  const generatePDF = async () => {
+    if (measureData) {
+      const jsPDF = (await import("jspdf")).default;
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("Measure Data Report", 14, 20);
+
+      doc.setFontSize(12);
+      let y = 35;
+      measureData.forEach((item, idx) => {
+        doc.text(
+          `${idx + 1}. ${Object.entries(item)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")}`,
+          14,
+          y,
+        );
+        y += 10;
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      doc.save(`measure-data-${date}.pdf`);
+    }
+  };
 
   useEffect(() => {
     const profileId = localStorage.getItem("profileId");
@@ -29,13 +61,13 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (profileInfo?.id) {
+    if (profileInfo?.id && date) {
       (async () => {
-        const res = await getAllMeasureDataByOwner(profileInfo.id);
+        const res = await getAllMeasureDataByOwnerAndDate(profileInfo.id, date);
         setMeasureData(res);
       })();
     }
-  }, [profileInfo]);
+  }, [profileInfo, date]);
 
   return (
     <>
@@ -50,18 +82,19 @@ export default function HomePage() {
               <div className="relative h-10 overflow-x-scroll rounded-sm bg-muted">
                 <TabsList>
                   <TabsTrigger value="measure_data">Measure Data</TabsTrigger>
-                  <TabsTrigger value="calendar">Calendar</TabsTrigger>
                   <TabsTrigger value="make_pdf">Export PDF</TabsTrigger>
-                  <TabsTrigger value="edit_profile">Edit Profile</TabsTrigger>
                 </TabsList>
               </div>
               <TabsContent value="measure_data">
+                <DatePicker onValueChange={setDate} />
                 {measureData && measureData?.length > 0 ? (
-                  <MeasureList measureData={measureData} />
+                  <>
+                    <MeasureList measureData={measureData} />
+                  </>
                 ) : (
                   <div className="mt-12">
                     <p className="text-center">
-                      You have no measure data yet. Please add a new one.
+                      No measure data. Please add a new one or change the date.
                     </p>
                     <Button
                       className="mx-auto mt-6 block"
@@ -72,10 +105,14 @@ export default function HomePage() {
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="calendar">
-                <div className="flex justify-center pt-10">
-                  <Calendar />
-                </div>
+              <TabsContent value="make_pdf">
+                {measureData && measureData?.length > 0 && (
+                  <>
+                    <Button className="mx-auto" onClick={generatePDF}>
+                      Generate PDF
+                    </Button>
+                  </>
+                )}
               </TabsContent>
             </Tabs>
           </div>

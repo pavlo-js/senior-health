@@ -27,23 +27,25 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { saveMeasureData } from "@/actions/handleMeasure";
 import { Textarea } from "@/components/ui/textarea";
 
 const FormSchema = z.object({
-  date: z.date({
-    required_error: "A date of birth is required.",
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "Date must be in YYYY-MM-DD format.",
   }),
-  time: z.enum(["morning", "afternoon", "evening"]),
-  temperature: z.string(),
+  time: z.string(),
+  temperature: z.string().refine(
+    (val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 30 && num <= 43;
+    },
+    {
+      message:
+        "Unrealistically body temperature. Please double-check the value.",
+    },
+  ),
   bloodPressSys: z.string(),
   bloodPressDia: z.string(),
   sugarLevel: z.string(),
@@ -64,8 +66,8 @@ export default function AddMeasurePage() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      date: new Date(),
-      time: "morning",
+      date: new Date().toISOString().slice(0, 10),
+      time: new Date().toTimeString().split(" ")[0],
     },
   });
 
@@ -113,7 +115,7 @@ export default function AddMeasurePage() {
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(new Date(field.value), "PPP")
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -124,8 +126,14 @@ export default function AddMeasurePage() {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) =>
+                          field.onChange(
+                            date ? date.toISOString().slice(0, 10) : "",
+                          )
+                        }
                         disabled={(date) =>
                           date > new Date() || date < new Date("1900-01-01")
                         }
@@ -144,21 +152,12 @@ export default function AddMeasurePage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Time</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="morning">Morning</SelectItem>
-                      <SelectItem value="afternoon">Afternoon</SelectItem>
-                      <SelectItem value="evening">Evening</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    type="time"
+                    step="1"
+                    {...field}
+                    className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
                 </FormItem>
               )}
             />

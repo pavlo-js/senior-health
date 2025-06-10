@@ -1,43 +1,43 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid"
 
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 
-import { useToast } from "@/hooks/use-toast";
-import MainLayout from "@/layout";
-import { Button } from "@/components/ui/button";
-import { saveProfile, UserProfile } from "@/actions/handleProfile";
-import { useNavigate } from "react-router-dom";
-import { SaveIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast"
+import MainLayout from "@/layout"
+import { Button } from "@/components/ui/button"
+import { saveProfile, UserProfile } from "@/actions/handleProfile"
+import { useNavigate } from "react-router-dom"
+import { SaveIcon } from "lucide-react"
+import { useEffect } from "react"
 
 const FormSchema = z.object({
   username: z.string(),
   age: z.string(),
   gender: z.enum(["male", "female"]),
-});
+})
 
 export default function AddProfilePage() {
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const { toast } = useToast()
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       gender: "male",
     },
-  });
+  })
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     const newProfile: UserProfile = {
@@ -49,23 +49,19 @@ export default function AddProfilePage() {
 
     (async () => {
       try {
-        await saveProfile(newProfile);
+        await saveProfile(newProfile)
         toast({
           title: "Added new profile successfully!",
-        });
-        navigate("/");
+        })
+        navigate("/")
       } catch (error) {
         toast({
           title: "Something went wrong!",
           variant: "destructive",
-        });
+        })
       }
-    })();
+    })()
   }
-
-  useEffect(() => {
-    console.log(form.formState.errors);
-  }, [form.formState.errors]);
 
   return (
     <MainLayout>
@@ -143,5 +139,5 @@ export default function AddProfilePage() {
         </form>
       </Form>
     </MainLayout>
-  );
+  )
 }

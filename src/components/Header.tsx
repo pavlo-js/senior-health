@@ -47,13 +47,6 @@ export default function Header() {
             >
               Add new profile
             </a>
-
-            <a
-              href="/calendar"
-              className="flex w-full items-center py-2 text-lg font-semibold italic"
-            >
-              Calendar
-            </a>
           </div>
         </SheetContent>
       </Sheet>

@@ -14,10 +14,11 @@ export default function MeasureCard({
   measureInfo: MeasureInfo;
 }) {
   return (
-    <Card className="p-4">
+    <Card className="mb-2 p-4">
       <h3 className="flex items-center gap-2">
         <CalendarDaysIcon />
-        {measureInfo.date.toDateString()}
+        {new Date(measureInfo.date).toDateString()}
+        <span className="ml-2">{measureInfo.time}</span>
       </h3>
 
       <div className="mt-4 flex items-center justify-between">
