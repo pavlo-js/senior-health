@@ -8,6 +8,8 @@ import { getAllMeasureDataByOwnerAndDate } from "@/actions/handleMeasure";
 import { MeasureInfo } from "./AddMeasure";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/DatePicker";
+import jsPDF from "jspdf";
+import { autoTable } from "jspdf-autotable";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -20,27 +22,36 @@ export default function HomePage() {
 
   const generatePDF = async () => {
     if (measureData) {
-      const jsPDF = (await import("jspdf")).default;
       const doc = new jsPDF();
 
       doc.setFontSize(18);
-      doc.text("Measure Data Report", 14, 20);
+      doc.text(`Measure Data Report: ${profileInfo?.username}`, 14, 20);
 
-      doc.setFontSize(12);
-      let y = 35;
-      measureData.forEach((item, idx) => {
-        doc.text(
-          `${idx + 1}. ${Object.entries(item)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(", ")}`,
-          14,
-          y,
-        );
-        y += 10;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
+      const headers = [
+        "Date",
+        "Time",
+        "Temperature (°C)",
+        "BloodPressure (mmHg)",
+        "Sugar (mmol/L)",
+        "Weight (Kg)",
+        "Comment",
+      ];
+
+      const rows = measureData.map((item) => [
+        item.date ?? "",
+        item.time ?? "",
+        item.temperature ?? "",
+        item.bloodPressSys + "/" + item.bloodPressDia,
+        item.sugarLevel ?? "",
+        item.weight ?? "",
+        item.comment ?? "",
+      ]);
+
+      autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: 30,
+        styles: { fontSize: 10 },
       });
 
       doc.save(`measure-data-${date}.pdf`);
@@ -108,7 +119,10 @@ export default function HomePage() {
               <TabsContent value="make_pdf">
                 {measureData && measureData?.length > 0 && (
                   <>
-                    <Button className="mx-auto" onClick={generatePDF}>
+                    <Button
+                      className="mx-auto mt-4 block"
+                      onClick={generatePDF}
+                    >
                       Generate PDF
                     </Button>
                   </>
