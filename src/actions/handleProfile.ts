@@ -59,6 +59,21 @@ export async function getProfile(id: string): Promise<UserProfile | null> {
   });
 }
 
+export async function getAllProfiles(): Promise<UserProfile[]> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      resolve(request.result || []);
+    };
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => db.close();
+  });
+}
+
 export async function deleteProfile(id: string): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {

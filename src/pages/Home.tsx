@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import MainLayout from "@/layout";
-import { getProfile, UserProfile } from "@/actions/handleProfile";
+import {
+  getAllProfiles,
+  getProfile,
+  UserProfile,
+} from "@/actions/handleProfile";
 import { useNavigate } from "react-router-dom";
 import MeasureList from "@/components/MeasureList";
 import { getAllMeasureDataByOwnerAndDate } from "@/actions/handleMeasure";
@@ -9,11 +13,21 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/DatePicker";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   const [profileInfo, setProfileInfo] = useState<UserProfile>();
+  const [profiles, setProfiles] = useState<UserProfile[]>();
+  const [activeProfileId, setActiveProfileId] = useState<string>();
   const [measureData, setMeasureData] = useState<MeasureInfo[]>();
   const [date, setDate] = useState<string>(
     new Date().toISOString().slice(0, 10),
@@ -59,10 +73,18 @@ export default function HomePage() {
     }
   };
 
+  const getAllProfilesCall = async () => {
+    const res = await getAllProfiles();
+    setProfiles(res);
+  };
+
   useEffect(() => {
+    getAllProfilesCall();
+
     const profileId = localStorage.getItem("profileId");
 
     if (profileId) {
+      setActiveProfileId(profileId);
       (async () => {
         const profileData = await getProfile(profileId);
         if (profileData) setProfileInfo(profileData);
@@ -73,22 +95,59 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (profileInfo?.id && date) {
+    if (activeProfileId) {
+      localStorage.setItem("profileId", activeProfileId);
       (async () => {
-        const res = await getAllMeasureDataByOwnerAndDate(profileInfo.id, date);
+        const profileData = await getProfile(activeProfileId);
+        if (profileData) setProfileInfo(profileData);
+      })();
+    } else {
+      setProfileInfo(undefined);
+    }
+  }, [activeProfileId]);
+
+  useEffect(() => {
+    if (activeProfileId && date) {
+      (async () => {
+        const res = await getAllMeasureDataByOwnerAndDate(
+          activeProfileId,
+          date,
+        );
         setMeasureData(res);
       })();
     }
-  }, [profileInfo, date]);
+  }, [activeProfileId, date]);
 
   return (
     <>
       {profileInfo ? (
         <MainLayout>
           <div className="px-4">
-            <h1 className="text-center text-xl font-semibold">
-              Welcome! {profileInfo.username}
-            </h1>
+            <div className="flex items-center justify-center gap-4">
+              <h1 className="text-center text-xl font-semibold">Welcome!</h1>
+              {profiles && (
+                <Select
+                  onValueChange={setActiveProfileId}
+                  value={activeProfileId}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {profiles.map((item, index) => (
+                        <SelectItem
+                          key={`homeScreen-userProfile-navigator-item-${index}`}
+                          value={item.id}
+                        >
+                          {item.username}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
 
             <div className="mt-4 flex items-center justify-between">
               <DatePicker onValueChange={setDate} />
