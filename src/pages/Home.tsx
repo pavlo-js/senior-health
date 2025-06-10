@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import MainLayout from "@/layout";
 import { getProfile, UserProfile } from "@/actions/handleProfile";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import MeasureList from "@/components/MeasureList";
 import { getAllMeasureDataByOwnerAndDate } from "@/actions/handleMeasure";
@@ -21,7 +20,7 @@ export default function HomePage() {
   );
 
   const generatePDF = async () => {
-    if (measureData) {
+    if (measureData && measureData.length > 0) {
       const doc = new jsPDF();
 
       doc.setFontSize(18);
@@ -55,6 +54,8 @@ export default function HomePage() {
       });
 
       doc.save(`measure-data-${date}.pdf`);
+    } else {
+      alert("No measure Data!");
     }
   };
 
@@ -89,46 +90,31 @@ export default function HomePage() {
               Welcome! {profileInfo.username}
             </h1>
 
-            <Tabs defaultValue="measure_data" className="mt-4">
-              <div className="relative h-10 overflow-x-scroll rounded-sm bg-muted">
-                <TabsList>
-                  <TabsTrigger value="measure_data">Measure Data</TabsTrigger>
-                  <TabsTrigger value="make_pdf">Export PDF</TabsTrigger>
-                </TabsList>
+            <div className="mt-4 flex items-center justify-between">
+              <DatePicker onValueChange={setDate} />
+
+              <Button className="" onClick={generatePDF}>
+                Generate PDF
+              </Button>
+            </div>
+
+            {measureData && measureData?.length > 0 ? (
+              <>
+                <MeasureList measureData={measureData} />
+              </>
+            ) : (
+              <div className="mt-12">
+                <p className="text-center">
+                  No measure data. Please add a new one or change the date.
+                </p>
+                <Button
+                  className="mx-auto mt-6 block"
+                  onClick={() => navigate("/add-measure")}
+                >
+                  Add new Measure Data
+                </Button>
               </div>
-              <TabsContent value="measure_data">
-                <DatePicker onValueChange={setDate} />
-                {measureData && measureData?.length > 0 ? (
-                  <>
-                    <MeasureList measureData={measureData} />
-                  </>
-                ) : (
-                  <div className="mt-12">
-                    <p className="text-center">
-                      No measure data. Please add a new one or change the date.
-                    </p>
-                    <Button
-                      className="mx-auto mt-6 block"
-                      onClick={() => navigate("/add-measure")}
-                    >
-                      Add new Measure Data
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="make_pdf">
-                {measureData && measureData?.length > 0 && (
-                  <>
-                    <Button
-                      className="mx-auto mt-4 block"
-                      onClick={generatePDF}
-                    >
-                      Generate PDF
-                    </Button>
-                  </>
-                )}
-              </TabsContent>
-            </Tabs>
+            )}
           </div>
         </MainLayout>
       ) : (
