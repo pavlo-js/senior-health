@@ -46,10 +46,42 @@ const FormSchema = z.object({
         "Unrealistically body temperature. Please double-check the value.",
     },
   ),
-  bloodPressSys: z.string(),
-  bloodPressDia: z.string(),
-  sugarLevel: z.string(),
-  weight: z.string(),
+  bloodPressSys: z.string().refine(
+    (val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 30 && num <= 200;
+    },
+    {
+      message: "Systolic blood pressure must be between 30 and 200 mmHg.",
+    },
+  ),
+  bloodPressDia: z.string().refine(
+    (val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 30 && num <= 200;
+    },
+    {
+      message: "Diastolic blood pressure must be between 30 and 200 mmHg.",
+    },
+  ),
+  sugarLevel: z.string().refine(
+    (val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 1.5 && num <= 35;
+    },
+    {
+      message: "Sugar level must be between 1.5 and 35 mmol/L.",
+    },
+  ),
+  weight: z.string().refine(
+    (val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 3 && num <= 300;
+    },
+    {
+      message: "Weight must be between 3 and 300 Kg.",
+    },
+  ),
   comment: z.string().optional(),
 });
 
