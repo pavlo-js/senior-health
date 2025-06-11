@@ -88,6 +88,11 @@ export default function HomePage() {
     setProfiles(res);
   };
 
+  const updateProfileInfo = async (profileId: string) => {
+    const profileData = await getProfile(profileId);
+    if (profileData) setProfileInfo(profileData);
+  };
+
   useEffect(() => {
     getAllProfilesCall();
 
@@ -95,10 +100,7 @@ export default function HomePage() {
 
     if (profileId) {
       setActiveProfileId(profileId);
-      (async () => {
-        const profileData = await getProfile(profileId);
-        if (profileData) setProfileInfo(profileData);
-      })();
+      updateProfileInfo(profileId);
     } else {
       navigate("/add-profile");
     }
@@ -107,12 +109,7 @@ export default function HomePage() {
   useEffect(() => {
     if (activeProfileId) {
       localStorage.setItem("profileId", activeProfileId);
-      (async () => {
-        const profileData = await getProfile(activeProfileId);
-        if (profileData) setProfileInfo(profileData);
-      })();
-    } else {
-      setProfileInfo(undefined);
+      updateProfileInfo(activeProfileId);
     }
   }, [activeProfileId]);
 

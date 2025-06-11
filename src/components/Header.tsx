@@ -47,6 +47,13 @@ export default function Header() {
             >
               Add new profile
             </a>
+
+            <a
+              href="/stats"
+              className="flex w-full items-center py-2 text-lg font-semibold italic"
+            >
+              Stats
+            </a>
           </div>
         </SheetContent>
       </Sheet>
