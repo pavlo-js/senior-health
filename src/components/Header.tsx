@@ -54,6 +54,13 @@ export default function Header() {
             >
               Stats
             </a>
+
+            <a
+              href="/triage"
+              className="flex w-full items-center py-2 text-lg font-semibold italic"
+            >
+              Triage
+            </a>
           </div>
         </SheetContent>
       </Sheet>

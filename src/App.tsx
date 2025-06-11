@@ -8,6 +8,7 @@ import AddProfilePage from "./pages/AddProfile";
 import CalendarPage from "./pages/Calendar";
 import AddMeasurePage from "./pages/AddMeasure";
 import Stats from "./pages/Stats";
+import TriagePage from "./pages/Triage";
 
 const routes = createBrowserRouter([
   { path: "/", element: <HomePage /> },
@@ -15,6 +16,7 @@ const routes = createBrowserRouter([
   { path: "/add-measure", element: <AddMeasurePage /> },
   { path: "/calendar", element: <CalendarPage /> },
   { path: "/stats", element: <Stats /> },
+  { path: "/triage", element: <TriagePage /> },
 ]);
 
 function App() {
