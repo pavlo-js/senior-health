@@ -24,6 +24,8 @@ import {
 import { getAllMeasureDataByOwnerAndDateRange } from "@/actions/handleMeasure";
 import { MeasureInfo } from "./AddMeasure";
 
+import { FileTextIcon } from "lucide-react";
+
 export default function HomePage() {
   const navigate = useNavigate();
 
@@ -159,10 +161,12 @@ export default function HomePage() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <DatePicker onValueChange={setStartDate} />
-              <DatePicker onValueChange={setEndDate} />
-              <Button className="" onClick={generatePDF}>
-                Generate PDF
+              <div className="flex gap-2">
+                <DatePicker onValueChange={setStartDate} />
+                <DatePicker onValueChange={setEndDate} />
+              </div>
+              <Button className="" onClick={generatePDF} size={"icon"}>
+                <FileTextIcon />
               </Button>
             </div>
 
@@ -177,7 +181,7 @@ export default function HomePage() {
                 </p>
                 <Button
                   className="mx-auto mt-6 block"
-                  onClick={() => navigate("/add-measure")}
+                  onClick={() => (window.location.href = "/add-measure")}
                 >
                   Add new Measure Data
                 </Button>

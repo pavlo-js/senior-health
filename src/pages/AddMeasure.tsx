@@ -94,6 +94,7 @@ export default function AddMeasurePage() {
   function onSubmit(formData: z.infer<typeof FormSchema>) {
     if (userId) {
       (async () => {
+        console.log({ userId });
         await saveMeasureData({ ...formData, id: uuidv4(), ownerId: userId });
 
         toast({ title: "New Measure data added.", duration: 2000 });
