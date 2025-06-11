@@ -7,7 +7,7 @@ import {
 } from "@/actions/handleProfile";
 import { useNavigate } from "react-router-dom";
 import MeasureList from "@/components/MeasureList";
-import { getAllMeasureDataByOwnerAndDate } from "@/actions/handleMeasure";
+import { getAllMeasureDataByOwnerAndDateRange } from "@/actions/handleMeasure";
 import { MeasureInfo } from "./AddMeasure";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/DatePicker";
@@ -29,7 +29,10 @@ export default function HomePage() {
   const [profiles, setProfiles] = useState<UserProfile[]>();
   const [activeProfileId, setActiveProfileId] = useState<string>();
   const [measureData, setMeasureData] = useState<MeasureInfo[]>();
-  const [date, setDate] = useState<string>(
+  const [startDate, setStartDate] = useState<string>(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [endDate, setEndDate] = useState<string>(
     new Date().toISOString().slice(0, 10),
   );
 
@@ -39,6 +42,8 @@ export default function HomePage() {
 
       doc.setFontSize(18);
       doc.text(`Measure Data Report: ${profileInfo?.username}`, 14, 20);
+
+      doc.text(`${startDate} / ${endDate}`, 14, 30);
 
       const headers = [
         "Date",
@@ -63,11 +68,11 @@ export default function HomePage() {
       autoTable(doc, {
         head: [headers],
         body: rows,
-        startY: 30,
+        startY: 35,
         styles: { fontSize: 10 },
       });
 
-      doc.save(`measure-data-${date}.pdf`);
+      doc.save(`measure-data-${startDate}/${endDate}.pdf`);
     } else {
       alert("No measure Data!");
     }
@@ -107,16 +112,17 @@ export default function HomePage() {
   }, [activeProfileId]);
 
   useEffect(() => {
-    if (activeProfileId && date) {
+    if (activeProfileId && startDate) {
       (async () => {
-        const res = await getAllMeasureDataByOwnerAndDate(
+        const res = await getAllMeasureDataByOwnerAndDateRange(
           activeProfileId,
-          date,
+          startDate,
+          endDate,
         );
         setMeasureData(res);
       })();
     }
-  }, [activeProfileId, date]);
+  }, [activeProfileId, startDate, endDate]);
 
   return (
     <>
@@ -150,8 +156,8 @@ export default function HomePage() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <DatePicker onValueChange={setDate} />
-
+              <DatePicker onValueChange={setStartDate} />
+              <DatePicker onValueChange={setEndDate} />
               <Button className="" onClick={generatePDF}>
                 Generate PDF
               </Button>
@@ -164,7 +170,7 @@ export default function HomePage() {
             ) : (
               <div className="mt-12">
                 <p className="text-center">
-                  No measure data. Please add a new one or change the date.
+                  No measure data. Please add a new one.
                 </p>
                 <Button
                   className="mx-auto mt-6 block"
