@@ -31,57 +31,45 @@ import { Input } from "@/components/ui/input";
 import { saveMeasureData } from "@/actions/handleMeasure";
 import { Textarea } from "@/components/ui/textarea";
 
+const isValidValue = (val: string | undefined, min: number, max: number) => {
+  if (!val) return true;
+  const num = parseFloat(val);
+  return !isNaN(num) && num >= min && num <= max;
+};
+
 const FormSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
-    message: "Date must be in YYYY-MM-DD format.",
-  }),
+  date: z.string(),
   time: z.string(),
-  temperature: z.string().refine(
-    (val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num >= 30 && num <= 43;
-    },
-    {
-      message:
-        "Unrealistically body temperature. Please double-check the value.",
-    },
-  ),
-  bloodPressSys: z.string().refine(
-    (val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num >= 30 && num <= 200;
-    },
-    {
+  temperature: z
+    .string()
+    .optional()
+    .refine((val) => isValidValue(val, 30, 43), {
+      message: "Unrealistic body temperature. Please double-check the value.",
+    }),
+  bloodPressSys: z
+    .string()
+    .optional()
+    .refine((val) => isValidValue(val, 30, 200), {
       message: "Systolic blood pressure must be between 30 and 200 mmHg.",
-    },
-  ),
-  bloodPressDia: z.string().refine(
-    (val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num >= 30 && num <= 200;
-    },
-    {
+    }),
+  bloodPressDia: z
+    .string()
+    .optional()
+    .refine((val) => isValidValue(val, 30, 200), {
       message: "Diastolic blood pressure must be between 30 and 200 mmHg.",
-    },
-  ),
-  sugarLevel: z.string().refine(
-    (val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num >= 1.5 && num <= 35;
-    },
-    {
+    }),
+  sugarLevel: z
+    .string()
+    .optional()
+    .refine((val) => isValidValue(val, 1.5, 35), {
       message: "Sugar level must be between 1.5 and 35 mmol/L.",
-    },
-  ),
-  weight: z.string().refine(
-    (val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num >= 3 && num <= 300;
-    },
-    {
+    }),
+  weight: z
+    .string()
+    .optional()
+    .refine((val) => isValidValue(val, 3, 300), {
       message: "Weight must be between 3 and 300 Kg.",
-    },
-  ),
+    }),
   comment: z.string().optional(),
 });
 
@@ -199,10 +187,11 @@ export default function AddMeasurePage() {
               name="temperature"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Body Temperature (°C) *</FormLabel>
+                  <FormLabel>Body Temperature (°C)</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -212,10 +201,11 @@ export default function AddMeasurePage() {
               name="bloodPressSys"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blood Pressure-Systolic (mmHg) *</FormLabel>
+                  <FormLabel>Blood Pressure-Systolic (mmHg)</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -225,10 +215,11 @@ export default function AddMeasurePage() {
               name="bloodPressDia"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blood Pressure-Diastolic (mmHg) *</FormLabel>
+                  <FormLabel>Blood Pressure-Diastolic (mmHg)</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -238,10 +229,11 @@ export default function AddMeasurePage() {
               name="sugarLevel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sugar Level (mmol/L) *</FormLabel>
+                  <FormLabel>Sugar Level (mmol/L)</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -251,10 +243,11 @@ export default function AddMeasurePage() {
               name="weight"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Weight (Kg) *</FormLabel>
+                  <FormLabel>Weight (Kg)</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

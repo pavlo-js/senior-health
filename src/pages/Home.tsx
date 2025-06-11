@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
-import MainLayout from "@/layout";
-import {
-  getAllProfiles,
-  getProfile,
-  UserProfile,
-} from "@/actions/handleProfile";
 import { useNavigate } from "react-router-dom";
-import MeasureList from "@/components/MeasureList";
-import { getAllMeasureDataByOwnerAndDateRange } from "@/actions/handleMeasure";
-import { MeasureInfo } from "./AddMeasure";
-import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/DatePicker";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
+
+import MainLayout from "@/layout";
+import MeasureList from "@/components/MeasureList";
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/DatePicker";
 import {
   Select,
   SelectContent,
@@ -21,6 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import {
+  getAllProfiles,
+  getProfile,
+  UserProfile,
+} from "@/actions/handleProfile";
+import { getAllMeasureDataByOwnerAndDateRange } from "@/actions/handleMeasure";
+import { MeasureInfo } from "./AddMeasure";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -42,7 +44,6 @@ export default function HomePage() {
 
       doc.setFontSize(18);
       doc.text(`Measure Data Report: ${profileInfo?.username}`, 14, 20);
-
       doc.text(`${startDate} / ${endDate}`, 14, 30);
 
       const headers = [
@@ -72,7 +73,9 @@ export default function HomePage() {
         styles: { fontSize: 10 },
       });
 
-      doc.save(`measure-data-${startDate}/${endDate}.pdf`);
+      doc.save(
+        `measure-data-${profileInfo?.username}-${startDate}/${endDate}.pdf`,
+      );
     } else {
       alert("No measure Data!");
     }
